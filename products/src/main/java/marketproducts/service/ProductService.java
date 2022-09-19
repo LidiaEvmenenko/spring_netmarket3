@@ -2,6 +2,7 @@ package marketproducts.service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import marketapi.ApiProductsListView;
 import marketapi.ApiProductsView;
 import marketproducts.entity.Category;
@@ -12,6 +13,8 @@ import marketproducts.model.ProductDto;
 import marketproducts.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService {
     private final CategoryService categoryService;
     private final ManufacturerService manufacturerService;
@@ -92,6 +96,11 @@ public class ProductService {
         Optional<Manufacturer> manufacturer = manufacturerService.findByTitle(title);
         return (ApiProductsListView) productRepository.findByManufacturer_Id(manufacturer.get().getId()).stream().
                 map(p -> productMapper.mapToView(p)).collect(Collectors.toList());
+    }
+
+    @KafkaListener(topics = "order-response", groupId = "order-message")
+    public void  onReceiveOrderId(@Payload Long orderId){
+        log.debug("Создан ордер {}", orderId);
     }
 
 }
