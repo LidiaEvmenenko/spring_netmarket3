@@ -15,10 +15,11 @@ spring:
               - POST
               - DELETE
               - OPTIONS
+              - PUT
             allowedHeaders: "*"
       routes:
         - id: products
-          uri: http://localhost:8190
+          uri: http://localhost:8186
           predicates:
             - Path=/logic/**
           filters:
